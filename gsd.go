@@ -53,7 +53,7 @@ func createDB(db *sql.DB) {
 	return
 }
 
-func addTask(db *sql.DB, items []taskItem) {
+func addTask(items []taskItem) {
 	stmt, err := db.Prepare("INSERT INTO Task (id, description, category) values(?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
@@ -112,6 +112,17 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	renderTemplate(w, "view", p)
 }
 
+func insertHandler(w http.ResponseWriter, r *http.Request, title string) {
+	item := []taskItem{taskItem{"3", "desc3", "4"}}
+	addTask(item)
+	p, err := loadPage(title)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	renderTemplate(w, "insert", p)
+}
+
 func loadPage(title string) (*Page, error) {
 	taskItems := readTask();
 	var body []byte
@@ -140,11 +151,12 @@ func main() {
 	}
 	createDB(db)
 
-	addTask(db, testItems)
+	addTask(testItems)
 	taskItems := readTask();
 	for _, item := range taskItems {
 		fmt.Println(item.id, item.description, item.category)
 	}
 	http.HandleFunc("/view/", makeHandler(viewHandler))
+	http.HandleFunc("/insert/", makeHandler(insertHandler))
 	http.ListenAndServe(":8080", nil)
 }
