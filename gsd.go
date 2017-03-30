@@ -17,11 +17,11 @@ var db *sql.DB
 
 type Page struct {
 	Title string
-	Body []byte
+	Body []string 
 }
 
-var templates = template.Must(template.ParseFiles("view.html"))
-var validPath = regexp.MustCompile("^/view/test")
+var templates = template.Must(template.ParseFiles("view.html", "insert.html"))
+var validPath = regexp.MustCompile("^/(view|insert)/([a-zA-Z0-9])")
 
 type taskItem struct {
 	id string
@@ -41,7 +41,7 @@ func initDB() {
 }
 
 func createDB(db *sql.DB) {
-	sqlStmt := "CREATE TABLE Task (id integer primary key, description text, category integer);"
+	sqlStmt := "CREATE TABLE Task (id integer, description text, category integer);"
 	if db == nil {
 		fmt.Println("createDB : DB is nil")
 		log.Fatal()
@@ -94,12 +94,12 @@ func readTask () []taskItem {
 func makeHandler( fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m := validPath.FindStringSubmatch(r.URL.Path)
-		fmt.Println("m:"+m[0])
+		fmt.Println("m:"+m[2])
 		if m == nil {
 			http.NotFound(w,r)
 			return
 		}
-		fn(w, r, m[0])
+		fn(w, r, m[2])
 	}
 }
 
@@ -113,7 +113,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 func insertHandler(w http.ResponseWriter, r *http.Request, title string) {
-	item := []taskItem{taskItem{"3", "desc3", "4"}}
+	item := []taskItem{taskItem{"", "desc3", "4"}}
 	addTask(item)
 	p, err := loadPage(title)
 	if err != nil {
@@ -125,9 +125,9 @@ func insertHandler(w http.ResponseWriter, r *http.Request, title string) {
 
 func loadPage(title string) (*Page, error) {
 	taskItems := readTask();
-	var body []byte
+	var body []string
 	for _, item := range taskItems {
-		body = []byte(item.description)
+		body = append(body,item.id + " "+ item.description +" "+ item.category +"\n")
 	}
 	return &Page{Title: title, Body: body}, nil
 }
