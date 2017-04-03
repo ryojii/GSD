@@ -115,7 +115,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 func insertHandler(w http.ResponseWriter, r *http.Request, title string) {
 	query := r.URL.Query()
 	fmt.Println(query["id"])
-	item := []taskItem{taskItem{"", "desc3", "4"}}
+	item := []taskItem{taskItem{query.Get("id"), query.Get("desc"), query.Get("category")}}
 	addTask(item)
 	p, err := loadPage(title)
 	if err != nil {
