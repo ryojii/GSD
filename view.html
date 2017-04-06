@@ -1,3 +1,19 @@
-
+<div>
 <h1>{{.Title}}</h1>
-<div>{{printf "%s" .Body}}</div>
+<table>
+	<thead>
+		<tr>
+			<th>Status</th>
+			<th>Task</th>
+			<th>Category</th>
+		</tr>
+	</thead>
+	{{range .Tasks}}
+	<tr>
+		<td>{{.Status}}</td>
+		<td>{{.Description}}</td>
+		<td>{{.Category}}</td>
+	</tr>
+	{{end}}
+</table>
+</div>

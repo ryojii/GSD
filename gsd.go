@@ -17,16 +17,17 @@ var db *sql.DB
 
 type Page struct {
 	Title string
-	Body []string 
+	Tasks []taskItem
 }
 
 var templates = template.Must(template.ParseFiles("view.html", "insert.html"))
 var validPath = regexp.MustCompile("^/(view|insert)/([a-zA-Z0-9])")
 
 type taskItem struct {
-	id string
-	description string
-	category string
+	Id string
+	Status bool
+	Description string
+	Category string
 }
 
 func initDB() {
@@ -41,7 +42,7 @@ func initDB() {
 }
 
 func createDB(db *sql.DB) {
-	sqlStmt := "CREATE TABLE Task (id integer, description text, category integer);"
+	sqlStmt := "CREATE TABLE Task (id integer,status boolean, description text, category integer);"
 	if db == nil {
 		fmt.Println("createDB : DB is nil")
 		log.Fatal()
@@ -54,14 +55,14 @@ func createDB(db *sql.DB) {
 }
 
 func addTask(items []taskItem) {
-	stmt, err := db.Prepare("INSERT INTO Task (id, description, category) values(?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Task (id, status, description, category) values(?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
 	for _, item := range items {
-		_, err2 := stmt.Exec(item.id, item.description, item.category)
+		_, err2 := stmt.Exec(item.Id, false, item.Description, item.Category)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
@@ -73,7 +74,7 @@ func readTask () []taskItem {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	rows, err := db.Query("SELECT id, description, category FROM Task" )
+	rows, err := db.Query("SELECT id, status, description, category FROM Task" )
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,7 +83,7 @@ func readTask () []taskItem {
 	var items []taskItem
 	for rows.Next() {
 		item := taskItem{}
-		err2 := rows.Scan(&item.id, &item.description, &item.category)
+		err2 := rows.Scan(&item.Id, &item.Status, &item.Description, &item.Category)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
@@ -115,7 +116,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 func insertHandler(w http.ResponseWriter, r *http.Request, title string) {
 	query := r.URL.Query()
 	fmt.Println(query["id"])
-	item := []taskItem{taskItem{query.Get("id"), query.Get("desc"), query.Get("category")}}
+	item := []taskItem{taskItem{query.Get("id"), false, query.Get("desc"), query.Get("category")}}
 	addTask(item)
 	p, err := loadPage(title)
 	if err != nil {
@@ -127,11 +128,7 @@ func insertHandler(w http.ResponseWriter, r *http.Request, title string) {
 
 func loadPage(title string) (*Page, error) {
 	taskItems := readTask();
-	var body []string
-	for _, item := range taskItems {
-		body = append(body,item.id + " "+ item.description +" "+ item.category +"\n")
-	}
-	return &Page{Title: title, Body: body}, nil
+	return &Page{Title: title, Tasks: taskItems}, nil
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
@@ -144,8 +141,8 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 func main() {
 	os.Remove(DATABASE)
 	testItems := []taskItem{
-		taskItem{"0", "desc0", "1"},
-		taskItem{"1", "desc1", "2"},
+		taskItem{"0", false, "desc0", "1"},
+		taskItem{"1", true, "desc1", "2"},
 	}
 	initDB()
 	if db == nil {
@@ -156,7 +153,7 @@ func main() {
 	addTask(testItems)
 	taskItems := readTask();
 	for _, item := range taskItems {
-		fmt.Println(item.id, item.description, item.category)
+		fmt.Println(item.Id, item.Description, item.Category)
 	}
 	http.HandleFunc("/view/", makeHandler(viewHandler))
 	http.HandleFunc("/insert/", makeHandler(insertHandler))
