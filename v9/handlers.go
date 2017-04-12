@@ -31,7 +31,7 @@ func ExecShow(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	exec := RepoFindExec(execId)
-	if exec.Id > 0 {
+	if exec.IdExec > 0 {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(exec); err != nil {
