@@ -16,15 +16,14 @@ var execs Execs
 var DATABASE = "exec.db"
 var db *sql.DB
 
-// Give us some seed data
-func init() {
-	if _, err := os.Stat(DATABASE); err != nil {
-		createDB()
-	}
+func Init() {
 	var err error
 	db, err = sql.Open("sqlite3",DATABASE)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if _, err := os.Stat(DATABASE); err != nil {
+		createDB()
 	}
 }
 func createDB() {
@@ -45,7 +44,7 @@ func RepoFindExec(id int) Exec {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	rows, err := db.Query("SELECT id, name, status, start, end FROM Execution WHERE id = " + strconv.Itoa(id) )
+	rows, err := db.Query("SELECT id, name, status, trace, start, end FROM Execution WHERE id = " + strconv.Itoa(id) )
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +52,7 @@ func RepoFindExec(id int) Exec {
 
 	var exec Exec
 	for rows.Next() {
-		err2 := rows.Scan(&exec.IdExec, &exec.Name, &exec.Status, &exec.StartDate, &exec.EndDate)
+		err2 := rows.Scan(&exec.IdExec, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
@@ -62,13 +61,13 @@ func RepoFindExec(id int) Exec {
 }
 
 func addExec(exec Exec) Exec{
-	stmt, err := db.Prepare("INSERT INTO Execution (id, name, status, start, end) values(?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Execution (id, name, status, trace, start, end) values(?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	_, err2 := stmt.Exec(exec.IdExec, exec.Name, exec.Status, exec.StartDate, exec.EndDate)
+	_, err2 := stmt.Exec(exec.IdExec, exec.Name, exec.Status, exec.Trace,  exec.StartDate, exec.EndDate)
 	if err2 != nil {
 		log.Fatal(err2)
 	}
@@ -80,7 +79,7 @@ func readExecs () Execs {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	rows, err := db.Query("SELECT id, name, status, start, end FROM Execution" )
+	rows, err := db.Query("SELECT id, name, status, trace, start, end FROM Execution" )
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,7 +88,7 @@ func readExecs () Execs {
 	var execs Execs
 	for rows.Next() {
 		exec := Exec{}
-		err2 := rows.Scan(&exec.IdExec, &exec.Name, &exec.Status, &exec.StartDate, &exec.EndDate)
+		err2 := rows.Scan(&exec.IdExec, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
 		if err2 != nil {
 			log.Fatal(err2)
 		}

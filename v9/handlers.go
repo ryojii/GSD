@@ -7,9 +7,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"html/template"
 
 	"github.com/gorilla/mux"
 )
+
+var templates = template.Must(template.ParseFiles("exec.html", "execs.html"))
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Welcome!\n")
@@ -32,11 +35,9 @@ func ExecShow(w http.ResponseWriter, r *http.Request) {
 	}
 	exec := RepoFindExec(execId)
 	if exec.IdExec > 0 {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(exec); err != nil {
-			panic(err)
-		}
+		renderTemplate(w, "exec", &exec )
 		return
 	}
 
@@ -51,11 +52,9 @@ func ExecShow(w http.ResponseWriter, r *http.Request) {
 func ExecsShow(w http.ResponseWriter, r *http.Request) {
 	execs := readExecs()
 	if len(execs) > 0 {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(execs); err != nil {
-			panic(err)
-		}
+		renderTemplateExecs(w, "execs", &execs)
 		return
 	}
 
@@ -96,5 +95,19 @@ func ExecCreate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(t); err != nil {
 		panic(err)
+	}
+}
+ 
+func renderTemplate( w http.ResponseWriter, template string, exec *Exec) {
+	err := templates.ExecuteTemplate(w, template+".html", exec)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func renderTemplateExecs( w http.ResponseWriter, template string, execs *Execs) {
+	err := templates.ExecuteTemplate(w, template+".html", execs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
