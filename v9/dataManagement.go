@@ -27,7 +27,7 @@ func Init() {
 	}
 }
 func createDB() {
-	sqlStmt := "CREATE TABLE Execution (id INTEGER, name VARCHAR(255), status VARCHAR(50), trace BLOB, forcedStatus varchar(50), start DATETIME, end DATETIME);"
+	sqlStmt := "CREATE TABLE Execution (id VARCHAR(100), name VARCHAR(255), status VARCHAR(50), trace BLOB, forcedStatus varchar(50), start DATETIME, end DATETIME);"
 	if db == nil {
 		fmt.Println("createDB : DB is nil")
 		log.Fatal()
@@ -95,26 +95,4 @@ func readExecs () Execs {
 		execs = append(execs, exec)
 	}
 	return execs
-}
-
-
-
-
-
-//this is bad, I don't think it passes race condtions
-func RepoCreateExec(t Exec) Exec {
-	currentId += 1
-	t.IdExec = currentId
-	execs = append(execs, t)
-	return t
-}
-
-func RepoDestroyExec(id int) error {
-	for i, t := range execs {
-		if t.IdExec == id {
-			execs = append(execs[:i], execs[i+1:]...)
-			return nil
-		}
-	}
-	return fmt.Errorf("Could not find Exec with id of %d to delete", id)
 }

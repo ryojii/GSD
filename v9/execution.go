@@ -3,7 +3,7 @@ package main
 import "time"
 
 type Exec struct {
-	IdExec        int   `json:"idexec"`
+	IdExec    string    `json:"idexec"`
 	Name      string    `json:"name"`
 	Status	  string    `json:"status"`
 	Trace	  string    `json:"trace"`
