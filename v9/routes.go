@@ -42,4 +42,10 @@ var routes = Routes{
 		"/execs",
 		ExecsShow,
 	},
+	Route{
+		"ExecsSearch",
+		"GET",
+		"/search/{searchMethod}/{search}",
+		ExecsSearch,
+	},
 }

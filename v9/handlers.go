@@ -26,6 +26,31 @@ func ExecIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ExecsSearch(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	var searchMethod string
+	var search string
+	searchMethod = vars["method"]
+	search = vars["search"]
+	//la methode find a toujours la même signature, je dois pouvoir en faire un pointeur
+	execs := searchMethod(search)
+	if len(execs) > 0 {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(execs); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	// If we didn't find it, 404
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
 func ExecShow(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var execId int
@@ -33,7 +58,7 @@ func ExecShow(w http.ResponseWriter, r *http.Request) {
 	if execId, err = strconv.Atoi(vars["execId"]); err != nil {
 		panic(err)
 	}
-	exec := RepoFindExec(execId)
+	exec := FindExecById(execId)
 	if exec.IdExec > 0 {
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
