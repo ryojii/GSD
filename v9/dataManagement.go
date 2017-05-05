@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"database/sql"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
-	"strconv"
 	"os"
+	"strconv"
 )
 
 var currentId int
@@ -18,7 +18,7 @@ var db *sql.DB
 
 func Init() {
 	var err error
-	db, err = sql.Open("sqlite3",DATABASE)
+	db, err = sql.Open("sqlite3", DATABASE)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,12 +39,20 @@ func createDB() {
 	return
 }
 
-func RepoFindExec(id int) Exec {
+func FindExecById(id int) Exec {
+	return findExec("id = " + strconv.Itoa(id))
+}
+
+func FindExcByName(search string) Exec {
+	return findExec("name = \"" + search + "\"")
+}
+
+func findExec(search string) Exec {
 	if db == nil {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	rows, err := db.Query("SELECT id, name, status, trace, start, end FROM Execution WHERE id = " + strconv.Itoa(id) )
+	rows, err := db.Query("SELECT id, idcampaign, name, status, trace, start, end FROM Execution WHERE " + search)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,7 +60,7 @@ func RepoFindExec(id int) Exec {
 
 	var exec Exec
 	for rows.Next() {
-		err2 := rows.Scan(&exec.IdExec, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
+		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
@@ -60,26 +68,32 @@ func RepoFindExec(id int) Exec {
 	return exec
 }
 
-func addExec(exec Exec) Exec{
-	stmt, err := db.Prepare("INSERT INTO Execution (id, name, status, trace, start, end) values(?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
+// also add search by date
 
-	_, err2 := stmt.Exec(exec.IdExec, exec.Name, exec.Status, exec.Trace,  exec.StartDate, exec.EndDate)
-	if err2 != nil {
-		log.Fatal(err2)
-	}
-	return exec
+func FindExecsByTrace(search string) Execs {
+	return findExecs("trace contain(\""+ search +"\")")
 }
 
-func readExecs () Execs {
+func FindExecsByMatchingName(search string) Execs {
+	//I should find another to do this, it's a sort of ... ugly
+	return findExecs("name LIKE (" + search + ")")
+}
+
+func FindExecsByStatus(status string) Execs {
+	return findExecs("status = \"" + status + "\"")
+}
+
+func FindExecByCampaign(campaign string) Execs {
+	return findExecs("idcampaign = \"" + campaign + "\"")
+}
+
+func findExecs(search string) Execs {
+
 	if db == nil {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	rows, err := db.Query("SELECT id, name, status, trace, start, end FROM Execution" )
+	rows, err := db.Query("SELECT id, idcampaign, name, status, trace, start, end FROM Execution WHERE " + search)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,7 +102,43 @@ func readExecs () Execs {
 	var execs Execs
 	for rows.Next() {
 		exec := Exec{}
-		err2 := rows.Scan(&exec.IdExec, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
+		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
+		if err2 != nil {
+			log.Fatal(err2)
+		}
+		execs = append(execs, exec)
+	}
+	return execs
+}
+func addExec(exec Exec) Exec {
+	stmt, err := db.Prepare("INSERT INTO Execution (id, idcampaign, name, status, trace, start, end) values(?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	_, err2 := stmt.Exec(exec.IdExec, exec.IdCampaign, exec.Name, exec.Status, exec.Trace, exec.StartDate, exec.EndDate)
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	return exec
+}
+
+func readExecs() Execs {
+	if db == nil {
+		fmt.Println("pointeur de DB null")
+		log.Fatal()
+	}
+	rows, err := db.Query("SELECT id, idcampaign, name, status, trace, start, end FROM Execution")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var execs Execs
+	for rows.Next() {
+		exec := Exec{}
+		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
