@@ -41,5 +41,5 @@ var routes = Routes{
 		"GET",
 		"/execs",
 		ExecsShow,
-	},
+    },
 }

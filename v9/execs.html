@@ -1,30 +1,9 @@
-<!DOCTYPE html>
 <html>
+<head>
+    <script src="js/ag-grid/ag-grid.js"></script>
+    <script src="js/example1.js"></script>
+</head>
 <body>
-<div>
-<h1>All Executions</h1>
-<table border=1>
-	<thead>
-		<tr>
-			<th>Id</th>
-			<th>Name</th>
-			<th>Status</th>
-			<th>Trace</th>
-			<th>Start</th>
-			<th>End</th>
-		</tr>
-	</thead>
-	{{range .}}
-	<tr>
-		<td>{{.IdExec}}</td>
-		<td>{{.Name}}</td>
-		<td>{{.Status}}</td>
-		<td>{{.Trace}}</td>
-		<td>{{.StartDate}}</td>
-		<td>{{.EndDate}}</td>
-	</tr>
-	{{end}}
-</table>
-</div>
+    <div id="myGrid" style="height: 100%;" class="ag-fresh"></div>
 </body>
 </html>

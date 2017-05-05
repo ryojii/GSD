@@ -6,10 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"html/template"
-
-	"github.com/gorilla/mux"
 )
 
 var templates = template.Must(template.ParseFiles("exec.html", "execs.html"))
@@ -19,42 +16,28 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func ExecIndex(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	execs := readExecs()
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(execs); err != nil {
-		panic(err)
-	}
+		renderTemplateExecs(w, "execs", &execs )
 }
 
 func ExecShow(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	var execId int
-	var err error
-	if execId, err = strconv.Atoi(vars["execId"]); err != nil {
-		panic(err)
-	}
-	exec := RepoFindExec(execId)
-	if exec.IdExec > 0 {
+	execs := readExecs()
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		renderTemplate(w, "exec", &exec )
+		renderTemplateExecs(w, "execs", &execs )
 		return
-	}
-
-	// If we didn't find it, 404
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusNotFound)
-	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
-		panic(err)
-	}
 }
 
 func ExecsShow(w http.ResponseWriter, r *http.Request) {
 	execs := readExecs()
 	if len(execs) > 0 {
-		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		renderTemplateExecs(w, "execs", &execs)
+	    if err := json.NewEncoder(w).Encode(execs); err != nil {
+		    panic(err)
+	    }
 		return
 	}
 
