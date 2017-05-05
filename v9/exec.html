@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html>
+<head>
+	<title>Execution details</title>
+	<link rel="stylesheet" href="execution.css"/>
+</head>
 <body>
-<div>
-<h1>{{.Name}}</h1>
+<div class="wrapper">
+<h1 class="exec-title">{{.Name}}</h1>
 <table border=1>
 	<thead>
 		<tr>
 			<th>Id</th>
+			<th>Campaign</th>
 			<th>Name</th>
 			<th>Status</th>
 			<th>Trace</th>
@@ -16,6 +21,7 @@
 	</thead>
 	<tr>
 		<td>{{.IdExec}}</td>
+		<td>{{.IdCampaign}}</td>
 		<td>{{.Name}}</td>
 		<td>{{.Status}}</td>
 		<td>{{.Trace}}</td>

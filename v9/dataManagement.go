@@ -27,7 +27,7 @@ func Init() {
 	}
 }
 func createDB() {
-	sqlStmt := "CREATE TABLE Execution (id VARCHAR(100), name VARCHAR(255), status VARCHAR(50), trace BLOB, forcedStatus varchar(50), start DATETIME, end DATETIME);"
+	sqlStmt := "CREATE TABLE Execution (id INTEGER, idcampaign VARCHAR(100), name VARCHAR(255), status VARCHAR(50), trace BLOB, forcedStatus varchar(50), start DATETIME, end DATETIME);"
 	if db == nil {
 		fmt.Println("createDB : DB is nil")
 		log.Fatal()
@@ -70,20 +70,24 @@ func findExec(search string) Exec {
 
 // also add search by date
 
+func FindExecsByDate(search string) Execs {
+	return findExecs("date contain(\""+ search +"\")")
+}
+
 func FindExecsByTrace(search string) Execs {
 	return findExecs("trace contain(\""+ search +"\")")
 }
 
 func FindExecsByMatchingName(search string) Execs {
 	//I should find another to do this, it's a sort of ... ugly
-	return findExecs("name LIKE (" + search + ")")
+	return findExecs("name LIKE '%" + search +"%'" )
 }
 
 func FindExecsByStatus(status string) Execs {
 	return findExecs("status = \"" + status + "\"")
 }
 
-func FindExecByCampaign(campaign string) Execs {
+func FindExecsByCampaign(campaign string) Execs {
 	return findExecs("idcampaign = \"" + campaign + "\"")
 }
 
