@@ -4,7 +4,7 @@ import "time"
 
 type Exec struct {
 	IdExec       int       `json:"idexec"`
-	IdCampaign   int       `json:"idcampaign"`
+	IdCampaign   string    `json:"idcampaign"`
 	Name         string    `json:"name"`
 	Status       string    `json:"status"`
 	Trace        string    `json:"trace"`
