@@ -58,14 +58,16 @@ func ExecsSearch(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//view one execution
 func ExecShow(w http.ResponseWriter, r *http.Request) {
 	execs := readExecs()
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		renderTemplateExecs(w, "execs", &execs )
+		renderTemplateExecs(w, "exec", &execs )
 		return
 }
 
+//view all executions
 func ExecsShow(w http.ResponseWriter, r *http.Request) {
 	execs := readExecs()
 	if len(execs) > 0 {
