@@ -16,12 +16,12 @@ var routes = Routes{
 		"Index",
 		"GET",
 		"/",
-		Index,
+		ExecIndex,
 	},
 	Route{
 		"ExecIndex",
-		"GET",
-		"/exec",
+		"PUT",
+		"/exec/{execId}",
 		ExecIndex,
 	},
 	Route{

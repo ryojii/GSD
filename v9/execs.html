@@ -2,32 +2,44 @@
 <html>
 <head>
 	<title>Execution details</title>
-	<script type="text/javascript" src="https://core.jquery.com/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
 
 </head>
 <body>
 <div class="wrapper">
-	<form id="search-form" onsubmit="return false">
+	<form id="search-form" onSubmit="return false">
 		<input name="search"/>
-		<input type="submit" value="search" onclick="submitSearch()"/>
+		<input type="submit" value="search" onClick="submitSearch()"/>
 	</form>
-	<table width="100%">
+	<table width="100%" style="border:1pxi solid black;">
 		<thead>
-			<th width="10%">Id</th>
-			<th width="10%">Campaign</th>
-			<th width="20%">Name</th>
-			<th width="10%">Status</th>
-			<th width="30%">Trace</th>
-			<th width="10%">Start date</th>
-			<th width="10%">End date</th>
+            <tr style="text-align:left;">
+    			<th width="5%">Id</th>
+	    		<th width="10%">Campaign</th>
+		    	<th width="20%">Name</th>
+			    <th width="1%">Status</th>
+    			<th width="35%">Trace</th>
+	    		<th width="10%">Start date</th>
+		    	<th width="10%">End date</th>
+            </tr>
 		</thead>
+        <tbody id="search-results"></tbody>
 	</table>
 	<script>
 		function submitSearch(){
 			$.ajax({
-				url: "/search",
+				url: "/execs",
 				method: "GET",
 				data: $("#search-form").serialize(),
+                success: function(data) {
+                    var searchResults = $("#search-results");
+                    searchResults.empty();
+
+                    data.forEach(function(result) {
+                        var row = $("<tr><td>"+ result.idexec+"</td><td>"+ result.idcampaign +"</td><td>"+result.name+"</td><td>"+result.status+"</td><td>"+result.trace+"</td><td>"+result.start+"</td><td>"+result.end+"</td></tr>");
+                        searchResults.append(row);
+                    });
+                }
 			});
 
 			return false;

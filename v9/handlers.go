@@ -12,15 +12,10 @@ import (
 
 var templates = template.Must(template.ParseFiles("exec.html", "execs.html"))
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome!\n")
-}
-
 func ExecIndex(w http.ResponseWriter, r *http.Request) {
-	execs := readExecs()
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-		renderTemplateExecs(w, "execs", &execs )
+	renderTemplateExecs(w, "execs", nil)
 }
 
 func ExecsSearch(w http.ResponseWriter, r *http.Request) {
