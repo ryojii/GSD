@@ -48,4 +48,16 @@ var routes = Routes{
 		"/search/{searchMethod}/{search}",
 		ExecsSearch,
 	},
+	Route{
+		"ExecDelete",
+		"GET",
+		"/delete",
+		ExecDel,
+	},
+	Route{
+		"ExecUpdate",
+		"POST",
+		"/update/{id}/{field}",
+		ExecUpdate,
+	},
 }

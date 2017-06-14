@@ -27,7 +27,7 @@ func Init() {
 	}
 }
 func createDB() {
-	sqlStmt := "CREATE TABLE Execution (id INTEGER, idcampaign VARCHAR(100), name VARCHAR(255), status VARCHAR(50), trace BLOB, forcedStatus varchar(50), start DATETIME, end DATETIME);"
+	sqlStmt := "CREATE TABLE Execution (id INTEGER primary key, idcampaign VARCHAR(100), name VARCHAR(255), status VARCHAR(50), trace BLOB, forcedStatus varchar(50), start DATETIME, end DATETIME);"
 	if db == nil {
 		fmt.Println("createDB : DB is nil")
 		log.Fatal()
@@ -126,6 +126,32 @@ func addExec(exec Exec) Exec {
 		log.Fatal(err2)
 	}
 	return exec
+}
+
+func deleteId(id string) {
+    stmt, err := db.Prepare("DELETE FROM Execution WHERE id = ?")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(id)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+
+func updateId(id string, field string, value string) {
+    stmt, err := db.Prepare("UPDATE Execution SET ? = ? WHERE id = ?")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(field, value, id)
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 
 func readExecs() Execs {

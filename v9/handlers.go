@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -21,7 +20,6 @@ func ExecIndex(w http.ResponseWriter, r *http.Request) {
 func ExecsSearch(w http.ResponseWriter, r *http.Request) {
 	var searchMethod string
 	var search string
-	fmt.Println(r.URL.Path)
 	path := strings.Split(r.URL.Path, "/")
 	searchMethod = path[len(path) -2]
 	search = path[len(path)-1]
@@ -113,7 +111,20 @@ func ExecCreate(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 }
- 
+
+func ExecDel(w http.ResponseWriter, r *http.Request) {
+    deleteId(r.FormValue("id"))
+    w.WriteHeader(http.StatusOK)
+}
+
+func ExecUpdate(w http.ResponseWriter, r *http.Request) {
+	path := strings.Split(r.URL.Path, "/")
+	field := path[len(path)-1]
+	id := path[len(path) -2]
+	value := path[len(path)-3]
+    updateId(id, field,value)
+}
+
 func renderTemplate( w http.ResponseWriter, template string, exec *Exec) {
 	err := templates.ExecuteTemplate(w, template+".html", exec)
 	if err != nil {

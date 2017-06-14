@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Execution details</title>
+	<title>List Executions</title>
 	<script type="text/javascript" src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
 
 </head>
@@ -11,6 +11,7 @@
 		<input name="search"/>
 		<input type="submit" value="search" onClick="submitSearch()"/>
 	</form>
+    <div id="executions-list">
 	<table width="100%" style="border:1pxi solid black;">
 		<thead>
             <tr style="text-align:left;">
@@ -21,6 +22,7 @@
     			<th width="35%">Trace</th>
 	    		<th width="10%">Start date</th>
 		    	<th width="10%">End date</th>
+                <th></th>
             </tr>
 		</thead>
         <tbody id="search-results"></tbody>
@@ -36,7 +38,7 @@
                     searchResults.empty();
 
                     data.forEach(function(result) {
-                        var row = $("<tr><td>"+ result.idexec+"</td><td>"+ result.idcampaign +"</td><td>"+result.name+"</td><td>"+result.status+"</td><td>"+result.trace+"</td><td>"+result.start+"</td><td>"+result.end+"</td></tr>");
+                        var row = $("<tr><td>"+ result.idexec+"</td><td>"+ result.idcampaign +"</td><td>"+result.name+"</td><td>"+result.status+"</td><td>"+result.trace+"</td><td>"+result.start+"</td><td>"+result.end+"</td><td><button type='button' value='delete' onclick='deleteExec("+result.idexec+")'</td></tr>");
                         searchResults.append(row);
                     });
                 }
@@ -44,7 +46,18 @@
 
 			return false;
 		}
+
+        function deleteExec(id) {
+            $.ajax({
+                url: "/delete?id="+id,
+                method: "GET"
+            });
+        }
 	</script>
+    </div>
+    <div id="execution detail">
+        <p></p>
+    </div>
 </div>
 </body>
 </html>
