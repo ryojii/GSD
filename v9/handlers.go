@@ -5,19 +5,32 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"html/template"
 	"strings"
+    "github.com/yosssi/ace"
 )
 
-var templates = template.Must(template.ParseFiles("exec.html", "execs.html"))
+
 
 func ExecIndex(w http.ResponseWriter, r *http.Request) {
+    template, err := ace.Load("execs", "", nil)
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	renderTemplateExecs(w, "execs", nil)
+	if err = template.Execute(w, r); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 }
 
 func ExecsSearch(w http.ResponseWriter, r *http.Request) {
+    template, err := ace.Load("execs", "", nil)
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 	var searchMethod string
 	var search string
 	path := strings.Split(r.URL.Path, "/")
@@ -39,7 +52,9 @@ func ExecsSearch(w http.ResponseWriter, r *http.Request) {
 	if len(execs) > 0 {
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		renderTemplateExecs(w, "execs", &execs )
+	    if err := template.Execute(w, r); err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+        }
 		return
 	}
 
@@ -53,11 +68,20 @@ func ExecsSearch(w http.ResponseWriter, r *http.Request) {
 
 //view one execution
 func ExecShow(w http.ResponseWriter, r *http.Request) {
-	execs := readExecs()
-		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
-		renderTemplateExecs(w, "exec", &execs )
-		return
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    if exec, err := readExec("2"); err == nil {
+	    w.WriteHeader(http.StatusOK)
+        if err := json.NewEncoder(w).Encode(exec); err != nil {
+            panic(err)
+        }
+    } else {
+	    // If we didn't find it, 404
+	    w.WriteHeader(http.StatusNotFound)
+    	if err = json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		    panic(err)
+	    }
+    }
+    return
 }
 
 //view all executions
@@ -84,7 +108,10 @@ func ExecsShow(w http.ResponseWriter, r *http.Request) {
 /*
 Test with this curl command:
 
-curl -H "Content-Type: application/json" -d '{"name":"New Execution"}' http://localhost:8080/execs
+curl -H "Content-Type: application/json" -d '{"idcampaign":"4.2.4","name":"New Execution"}' http://localhost:8080/execs
+
+{"idexec":0,"idcampaign":"4.2.4","name":"New Execution","status":"","trace":"","fstatus":"","start":"0001-01-01T00:00:00Z","end":"0001-01-01T00:00:00Z"}
+
 
 */
 func ExecCreate(w http.ResponseWriter, r *http.Request) {
@@ -123,18 +150,4 @@ func ExecUpdate(w http.ResponseWriter, r *http.Request) {
 	id := path[len(path) -2]
 	value := path[len(path)-3]
     updateId(id, field,value)
-}
-
-func renderTemplate( w http.ResponseWriter, template string, exec *Exec) {
-	err := templates.ExecuteTemplate(w, template+".html", exec)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func renderTemplateExecs( w http.ResponseWriter, template string, execs *Execs) {
-	err := templates.ExecuteTemplate(w, template+".html", execs)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
 }

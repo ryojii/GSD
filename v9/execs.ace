@@ -1,0 +1,39 @@
+= doctype html
+html
+  head
+    titleList Executions
+    script src="/js/jquery-3.2.1.min.js"
+    script src="/js/qamanagement.js"
+    css src="/js/qamanagement.css"
+  body
+    div class="wrapper"
+      form id="search-form" onsubmit="return false"
+        input type="text" name="search"
+        input type="submit" value="search" onClick="submitSearch()"
+        div id="executions-list" style="display:block"
+          table width="900px" style="border:1px solid black;"
+            thead
+              tr style="text-align:left;"
+                th width="50px" Id
+                th width="70px" Campaign
+                th width="100px" Name
+                th width="30px" Status
+                th width="300px" Trace
+                th width="50px" Start date
+                th width="50px" End date
+            tbody id="search-results"
+
+      div id="execution-detail" style="display:none"
+        p
+        button type="button" value="backToList" onclick="showList()" back to list
+        form id="detail-form"
+          div id="detail-result"
+            label campaign input id="campaign"
+            label name input type="text" id="name" value=""
+            label trace input id="trace"
+            label reviewer input id="reviewer"
+            label status input id="status"
+            label forcedStatus input id="forced-status"
+            label start input id="start"
+            label end input id="end"
+            input type="button" value="Save" onclick="saveExec()"

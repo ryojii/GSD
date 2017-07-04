@@ -2,16 +2,16 @@
 <html>
 <head>
 	<title>List Executions</title>
-	<script type="text/javascript" src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="/js/jquery-3.2.1.min.js"></script>
 
 </head>
 <body>
 <div class="wrapper">
-	<form id="search-form" onSubmit="return false">
-		<input name="search"/>
+	<form id="search-form" onsubmit="return false">
+		<input type="text" name="search"/>
 		<input type="submit" value="search" onClick="submitSearch()"/>
 	</form>
-    <div id="executions-list">
+    <div id="executions-list" style="display:block">
 	<table width="100%" style="border:1pxi solid black;">
 		<thead>
             <tr style="text-align:left;">
@@ -38,7 +38,7 @@
                     searchResults.empty();
 
                     data.forEach(function(result) {
-                        var row = $("<tr><td>"+ result.idexec+"</td><td>"+ result.idcampaign +"</td><td>"+result.name+"</td><td>"+result.status+"</td><td>"+result.trace+"</td><td>"+result.start+"</td><td>"+result.end+"</td><td><button type='button' value='delete' onclick='deleteExec("+result.idexec+")'</td></tr>");
+                        var row = $("<tr><td>"+ result.idexec+"</td><td>"+ result.idcampaign +"</td><td onclick='showDetail("+result.idexec+")'>"+result.name+"</td><td>"+result.status+"</td><td>"+result.trace+"</td><td>"+result.start+"</td><td>"+result.end+"</td><td><button type='button' value='delete' onclick='deleteExec("+result.idexec+")'>delete </button></td></tr>");
                         searchResults.append(row);
                     });
                 }
@@ -53,10 +53,54 @@
                 method: "GET"
             });
         }
+        
+        function showDetail(id) {
+            $.ajax( {
+                url: "/exec/"+id,
+                method: "GET",
+                data : $("detail-form").serialize(),
+                datatype : "json",
+                success: function(data) {
+                        $("#campaign").val(data.idcampaign);
+                        $("#name").val(data.name);
+                        $("#trace").val(data.trace);
+                        $("#reviewer").val(data.reviewe);
+                        $("#status").val(data.status);
+                        $("#forced-status").val(data.forcedStatus);
+                        $("#start").val(data.start);
+                        $("#end").val(data.end);
+                    }
+            });
+            $("#executions-list").hide();
+            $("#execution-detail").show();
+
+            return false;
+        }
+        
+        function showList() {
+            $("#executions-list").show();
+            $("#execution-detail").hide();
+            
+        }
+        
+        function saveExec() {
+            alert("ok, je vais enregistrer ça...");
+        }
 	</script>
     </div>
-    <div id="execution detail">
-        <p></p>
+        <div id="execution-detail" style="display:none">
+            <p><button type="button" value="backToList" onclick="showList()">back to list</button></p>
+            <form id="detail-form"><div id="detail-result">
+                <label>campaign</label> <input id="campaign"></br>
+                <label>name</label> <input type="text" id="name" value=""/></br>
+                <label>trace</label> <input id="trace"></br>
+                <label>reviewer</label> <input id="reviewer"></br>
+                <label>status</label> <input id="status"></br>
+                <label>forcedStatus</label> <input id="forced-status"></br>
+                <label>start</label> <input id="start"></br>
+                <label>end</label> <input id="end"></br>
+                <input type="button" value="Save" onclick="saveExec()"/>
+            </form>
     </div>
 </div>
 </body>
