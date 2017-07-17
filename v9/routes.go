@@ -56,8 +56,14 @@ var routes = Routes{
 	},
 	Route{
 		"ExecUpdate",
-		"POST",
-		"/update/{id}/{field}",
-		ExecUpdate,
+		"PUT",
+		"/update/{id}/reviewer/{name}",
+		ExecUpdateReviewer,
+	},
+	Route{
+		"ExecUpdate",
+		"PUT",
+		"/update/{id}/status/{name}",
+		ExecUpdateStatus,
 	},
 }

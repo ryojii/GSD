@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+    log.Printf("Serveur started")
 	Init()
 
 	router := NewRouter()

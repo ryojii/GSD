@@ -1,8 +1,10 @@
 {
-id:1,
-reqid : 0,
-name : "testcase 1",
-lens : "security",
-description: "description for test case 1",
-category : "functional",
-}
+"idcampaign" : "4.4.5",
+"reqid" : 0,
+"name" : "testcase 1",
+"status" : "PASSED",
+"trace" : "this is a java stack trace, long, boring and unusable",
+"lens" : "security",
+"description" : "description for test case 1",
+"category" : "functional"
+}  

@@ -4,13 +4,21 @@ html
     titleList Executions
     script src="/js/jquery-3.2.1.min.js"
     script src="/js/qamanagement.js"
-    css src="/js/qamanagement.css"
+    link rel="stylesheet" href="/js/qamanagement.css"
   body
     div class="wrapper"
-      form id="search-form" onsubmit="return false"
-        input type="text" name="search"
-        input type="submit" value="search" onClick="submitSearch()"
-        div id="executions-list" style="display:block"
+      div id="executions-list" style="display:block"
+        form id="search-form" onsubmit="return false"
+          input type="text" id="search"
+          select id="searchMethod"
+            option value="status" by status
+            option value="testName" by matching exact test name
+            option value="containTestName" by partial matching test name
+            option value="campaingName" by matching exact campaign name
+            option value="containCampaingName" by partial matching campaign name
+          input type="submit" value="search" onClick="submitSearch()"
+          input type="button" value="Get All" onClick="getAll()"
+
           table width="900px" style="border:1px solid black;"
             thead
               tr style="text-align:left;"
@@ -18,22 +26,32 @@ html
                 th width="70px" Campaign
                 th width="100px" Name
                 th width="30px" Status
+                th width="30px" Forced Status
+                th width="70px" Reviewer
                 th width="300px" Trace
                 th width="50px" Start date
                 th width="50px" End date
-            tbody id="search-results"
+             tbody id="search-results"
 
       div id="execution-detail" style="display:none"
-        p
         button type="button" value="backToList" onclick="showList()" back to list
-        form id="detail-form"
-          div id="detail-result"
-            label campaign input id="campaign"
-            label name input type="text" id="name" value=""
-            label trace input id="trace"
-            label reviewer input id="reviewer"
-            label status input id="status"
-            label forcedStatus input id="forced-status"
-            label start input id="start"
-            label end input id="end"
-            input type="button" value="Save" onclick="saveExec()"
+        h3.info id="campaign" name="campaign"
+        p.info id="name" name="name" value="" 
+        pre.info id="trace" name="trace" 
+        p.info id="start" name="start" 
+        p.info id="end" name="end" 
+        p
+          label reviewer
+          select id="reviewer" name="reviewer"
+            option value="tetienne" tetienne
+            option value="shache" shache
+            option value="klagdani" klagdani
+            option value="jaiguillon" jaiguillon
+        p.info id="status" name="status" 
+        p
+          label forcedStatus
+          select id="forced-status" name="forced-status"
+            option value="PASSED" PASSED
+            option value="FAILED" FAILED
+            option value="FP" FALSE POSITIVE
+            option value="BLOCKED" BLOCKED

@@ -2,11 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
     "github.com/yosssi/ace"
+    "fmt"
+    "strconv"
 )
 
 
@@ -26,11 +27,6 @@ func ExecIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func ExecsSearch(w http.ResponseWriter, r *http.Request) {
-    template, err := ace.Load("execs", "", nil)
-	if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
 	var searchMethod string
 	var search string
 	path := strings.Split(r.URL.Path, "/")
@@ -40,21 +36,25 @@ func ExecsSearch(w http.ResponseWriter, r *http.Request) {
 	switch searchMethod  {
 		case "status" :
 			execs = FindExecsByStatus(search)
-		case "matchingName" :
+		case "testName" :
 			execs = FindExecsByMatchingName(search)
-		case "date" :
-			execs = FindExecsByDate(search)
-		case "campaign" :
+		case "containTestName" :
+			execs = FindExecsBySimilarMatchingName(search)
+		case "campaignName" :
 			execs = FindExecsByCampaign(search)
+		case "containCampaignName" :
+			execs = FindExecsBySimilarCampaign(search)
 		case "trace" :
 			execs = FindExecsByTrace(search)
+		case "date" :
+			execs = FindExecsByDate(search)
 	}
 	if len(execs) > 0 {
-		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-	    if err := template.Execute(w, r); err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-        }
+	    if err := json.NewEncoder(w).Encode(execs); err != nil {
+		    panic(err)
+	    }
 		return
 	}
 
@@ -69,7 +69,9 @@ func ExecsSearch(w http.ResponseWriter, r *http.Request) {
 //view one execution
 func ExecShow(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    if exec, err := readExec("2"); err == nil {
+	path := strings.Split(r.URL.Path, "/")
+	var id string = path[len(path)-1]
+    if exec, err := readExec(id); err == nil {
 	    w.WriteHeader(http.StatusOK)
         if err := json.NewEncoder(w).Encode(exec); err != nil {
             panic(err)
@@ -116,7 +118,7 @@ curl -H "Content-Type: application/json" -d '{"idcampaign":"4.2.4","name":"New E
 */
 func ExecCreate(w http.ResponseWriter, r *http.Request) {
 	var exec Exec
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(err)
 	}
@@ -124,11 +126,13 @@ func ExecCreate(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	if err := json.Unmarshal(body, &exec); err != nil {
+        fmt.Println("unable to unmarshall json : " + err.Error())
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
 			panic(err)
 		}
+        return
 	}
 
 	t := addExec(exec)
@@ -144,10 +148,18 @@ func ExecDel(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
 }
 
-func ExecUpdate(w http.ResponseWriter, r *http.Request) {
+// URL : 	"/update/{id}/reviewer/{name}",
+func ExecUpdateReviewer(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
-	field := path[len(path)-1]
-	id := path[len(path) -2]
-	value := path[len(path)-3]
-    updateId(id, field,value)
+	id, _ := strconv.Atoi(path[len(path) -3])
+	name := path[len(path)-1]
+    updateId(id, "reviewer", name)
+}
+
+// URL : 	"/update/{id}/status/{name}",
+func ExecUpdateStatus(w http.ResponseWriter, r *http.Request) {
+	path := strings.Split(r.URL.Path, "/")
+	id, _ := strconv.Atoi(path[len(path) -3])
+	name := path[len(path)-1]
+    updateId(id, "forcedStatus", name)
 }

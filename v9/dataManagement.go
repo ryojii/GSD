@@ -29,7 +29,7 @@ func Init() {
 }
 }
 func createDB() {
-	sqlStmt := "CREATE TABLE Execution (idcampaign VARCHAR(100), name VARCHAR(255), status VARCHAR(50), trace BLOB, forcedStatus varchar(50), start DATETIME, end DATETIME);"
+	sqlStmt := "CREATE TABLE Execution (idcampaign VARCHAR(100), name VARCHAR(255), status VARCHAR(50), reviewer VARCHAR(70) DEFAULT 'null',  trace BLOB DEFAULT 'null', forcedStatus varchar(50) DEFAULT 'null', start DATETIME, end DATETIME);"
 	if db == nil {
 		fmt.Println("createDB : DB is nil")
 		log.Fatal()
@@ -45,6 +45,7 @@ func createDB() {
 
 // Create
 func addExec(exec Exec) error {
+	fmt.Println("exec content:" + exec.IdCampaign +" "+ exec.Name +" "+ exec.Status +" "+ exec.Trace)
 	stmt, err := db.Prepare("INSERT INTO Execution (idcampaign, name, status, trace, start, end) values(?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
@@ -65,8 +66,7 @@ func readExec(id string) (Exec, error) {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	fmt.Println("SELECT rowid, idcampaign, name, status, trace, start, end FROM Execution WHERE rowid ="+id)
-	rows, err := db.Query("SELECT rowid, idcampaign, name, status, trace, start, end FROM Execution WHERE rowid ="+id)
+	rows, err := db.Query("SELECT rowid, idcampaign, name, status, forcedStatus, reviewer, trace, start, end FROM Execution WHERE rowid = "+id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func readExec(id string) (Exec, error) {
 
 	var exec Exec= Exec{}
     rows.Next()
-	err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
+	err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.ForcedStatus, &exec.Reviewer, &exec.Trace, &exec.StartDate, &exec.EndDate)
 	if err2 != nil {
 		log.Fatal(err2)
 	}
@@ -86,7 +86,8 @@ func readExecs() Execs {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	rows, err := db.Query("SELECT rowid, idcampaign, name, status, trace, start, end FROM Execution")
+	fmt.Println("SELECT rowid, idcampaign, name, status, reviewer, trace, start, end FROM Execution")
+	rows, err := db.Query("SELECT rowid, idcampaign, name, status, forcedStatus, reviewer, trace, start, end FROM Execution")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,7 +96,7 @@ func readExecs() Execs {
 	var execs Execs
 	for rows.Next() {
 		exec := Exec{}
-		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
+		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.ForcedStatus, &exec.Reviewer, &exec.Trace, &exec.StartDate, &exec.EndDate)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
@@ -120,15 +121,15 @@ func deleteId(id string) {
 }
 
 // Update
-
-func updateId(id string, field string, value string) {
-    stmt, err := db.Prepare("UPDATE Execution SET ? = ? WHERE rowid = ?")
+func updateId(id int, field string, value string) {
+    fmt.Println("UPDATE Execution SET "+ field +" = " + value + " WHERE rowid= "+ strconv.Itoa(id))
+    stmt, err := db.Prepare("UPDATE Execution SET "+ field +" = ? WHERE rowid= ?")
     if err != nil {
+        fmt.Println(err.Error())
         log.Fatal(err)
     }
     defer stmt.Close()
-
-    _, err = stmt.Exec(field, value, id)
+    _, err = stmt.Exec(value, id)
     if err != nil {
         log.Fatal(err)
     }
@@ -149,7 +150,7 @@ func findExec(search string) Exec {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	rows, err := db.Query("SELECT rowid, idcampaign, name, status, trace, start, end FROM Execution WHERE " + search)
+	rows, err := db.Query("SELECT rowid, idcampaign, name, status, forcedStatus,, reviewer, trace, start, end FROM Execution WHERE " + search)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -157,7 +158,7 @@ func findExec(search string) Exec {
 
 	var exec Exec
 	for rows.Next() {
-		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
+		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.ForcedStatus, &exec.Reviewer, &exec.Trace, &exec.StartDate, &exec.EndDate)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
@@ -177,11 +178,20 @@ func FindExecsByTrace(search string) Execs {
 
 func FindExecsByMatchingName(search string) Execs {
 	//I should find another to do this, it's a sort of ... ugly
+	return findExecs("name = \"" + search +"\"" )
+}
+
+func FindExecsBySimilarMatchingName(search string) Execs {
+	//I should find another to do this, it's a sort of ... ugly
 	return findExecs("name LIKE '%" + search +"%'" )
 }
 
 func FindExecsByStatus(status string) Execs {
 	return findExecs("status = \"" + status + "\"")
+}
+
+func FindExecsBySimilarCampaign(campaign string) Execs {
+	return findExecs("idcampaign LIKE '%" + campaign + "%'")
 }
 
 func FindExecsByCampaign(campaign string) Execs {
@@ -194,7 +204,7 @@ func findExecs(search string) Execs {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	rows, err := db.Query("SELECT rowid, idcampaign, name, status, trace, start, end FROM Execution WHERE " + search)
+	rows, err := db.Query("SELECT rowid, idcampaign, name, status, forcedStatus, reviewer, trace, start, end FROM Execution WHERE " + search)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -203,7 +213,7 @@ func findExecs(search string) Execs {
 	var execs Execs
 	for rows.Next() {
 		exec := Exec{}
-		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.Trace, &exec.StartDate, &exec.EndDate)
+		err2 := rows.Scan(&exec.IdExec, &exec.IdCampaign, &exec.Name, &exec.Status, &exec.ForcedStatus, &exec.Reviewer, &exec.Trace, &exec.StartDate, &exec.EndDate)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
