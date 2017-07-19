@@ -141,10 +141,6 @@ func FindExecById(id int) Exec {
 	return findExec("rowid = " + strconv.Itoa(id))
 }
 
-func FindExcByName(search string) Exec {
-	return findExec("name = \"" + search + "\"")
-}
-
 func findExec(search string) Exec {
 	fmt.Println("DEBUG: search...")
 	if db == nil {
@@ -177,35 +173,13 @@ func FindExecsByTrace(search string) Execs {
 	return findExecs("trace contain(\"" + search + "\")")
 }
 
-func FindExecsByMatchingName(search string) Execs {
-	//I should find another to do this, it's a sort of ... ugly
-	return findExecs("name = \"" + search + "\"")
-}
-
-func FindExecsBySimilarMatchingName(search string) Execs {
-	//I should find another to do this, it's a sort of ... ugly
-	return findExecs("name LIKE '%" + search + "%'")
-}
-
-func FindExecsByStatus(status string) Execs {
-	return findExecs("status = \"" + status + "\"")
-}
-
-func FindExecsBySimilarCampaign(campaign string) Execs {
-	return findExecs("idcampaign LIKE '%" + campaign + "%'")
-}
-
-func FindExecsByCampaign(campaign string) Execs {
-	return findExecs("idcampaign = \"" + campaign + "\"")
-}
-
 func findExecs(search string) Execs {
 
 	if db == nil {
 		fmt.Println("pointeur de DB null")
 		log.Fatal()
 	}
-	fmt.Println("SELECT rowid, idcampaign, name, status, forcedStatus,, reviewer, trace, start, end FROM Execution WHERE " + search)
+	fmt.Println("SELECT rowid, idcampaign, name, status, forcedStatus, reviewer, trace, start, end FROM Execution WHERE " + search)
 	rows, err := db.Query("SELECT rowid, idcampaign, name, status, forcedStatus, reviewer, trace, start, end FROM Execution WHERE " + search)
 	if err != nil {
 		log.Fatal(err)
@@ -220,6 +194,9 @@ func findExecs(search string) Execs {
 			log.Fatal(err2)
 		}
 		execs = append(execs, exec)
+	}
+	for _, execution := range execs{
+		fmt.Println("find: " + execution.Name)
 	}
 	return execs
 }

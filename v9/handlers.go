@@ -25,41 +25,57 @@ func ExecIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func ExecsSearch(w http.ResponseWriter, r *http.Request) {
-	var searchMethod string
-	var search string
-	path := strings.Split(r.URL.Path, "/")
-	searchMethod = path[len(path)-2]
-	search = path[len(path)-1]
-	fmt.Println("DEBUG: will look for '"+search+"' by '"+searchMethod+"'")
+	reviewer :=	r.FormValue("reviewer")
+	campaign := r.FormValue("campaign")
+	status := r.FormValue("status")
+	name := r.FormValue("name")
+	fmt.Println("DEBUG: will look for '"+reviewer+"' '"+campaign+"' "+status)
 	var execs Execs
-	switch searchMethod {
-	case "status":
-		fmt.Println("DEBUG: search by exact status")
-		execs = FindExecsByStatus(search)
-	case "testName":
-		fmt.Println("DEBUG: search by exact test name")
-		execs = FindExecsByMatchingName(search)
-	case "containTestName":
-		fmt.Println("DEBUG: search by partial test name")
-		execs = FindExecsBySimilarMatchingName(search)
-	case "campaignName":
-		fmt.Println("DEBUG: search by exact campaign name")
-		execs = FindExecsByCampaign(search)
-	case "containCampaignName":
-		fmt.Println("DEBUG: search by partial campaign name")
-		execs = FindExecsBySimilarCampaign(search)
-	case "trace":
-		execs = FindExecsByTrace(search)
-	case "date":
-		execs = FindExecsByDate(search)
+	var searchReviewer string
+	var searchStatus string
+	var searchCampaign string
+	var searchName string
+	search := make([]string, 0)
+	if campaign != "" {
+		searchCampaign= "idcampaign LIKE '%"+ campaign +"%'"
+		search = append(search, searchCampaign)
 	}
-	if len(execs) > 0 {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(execs); err != nil {
-			panic(err)
+	if reviewer != "" {
+		searchReviewer = "reviewer LIKE '%"+ reviewer +"%'"
+		search = append(search, searchReviewer)
+	}
+	if name != "" {
+		searchName = "name LIKE '%" + name + "%'"
+		search = append(search, searchName)
+	}
+	if status != "" {
+		searchStatus = "status = \"" + status+ "\""
+		search = append(search, searchStatus)
+	}
+	if len(search) > 0 {
+		fmt.Println("slice length:" + strconv.Itoa(len(search)))
+		var searchString string
+		if len(search) > 1 {
+			for i := 0 ; i < len(search) ; i++ {
+				fmt.Println("current: "+ search[i])
+				if i == 0 {
+					searchString = search[i]
+				} else {
+					searchString += " AND "+search[i]
+				}
+			}
+		} else {
+			searchString = search[0]
 		}
-		return
+		execs = findExecs(searchString)
+		if len(execs) > 0 {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(w).Encode(execs); err != nil {
+				panic(err)
+			}
+			return
+		}
 	}
 
 	// If we didn't find it, 404

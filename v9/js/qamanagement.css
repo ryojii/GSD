@@ -1,11 +1,23 @@
 #execution-detail{
-    width: 500px;
+    width: 50em;
+}
+textarea.info {
+    width:59em;
+    height:25em;
 }
 .info {
-    background-color: #F8B;
+    background-color: #CBCBCB;
     padding-left: 5px;
 }
 
+table th {
+    background-color: #d0a3a3;
+}
+
+table tr:nth-child(odd) {
+    background-color: #a3d1bf;
+}
+
 label {
-    padding-right: 5px;
+    padding-right: 1em;
 }

@@ -13,7 +13,7 @@ function getAll(){
 function submitSearch(){
     $("#search-results").empty();
     $.ajax({
-        url: "/search/"+$("#searchMethod").find(":selected").val()+"/"+$("#search").val(),
+        url: "/search/",
         method: "GET",
         data: $("#search-form").serialize(),
         success: insertResults
@@ -94,7 +94,7 @@ function insertResults(data) {
     var searchResults = $("#search-results");
     searchResults.empty();
     data.forEach(function(result) {
-        var row = $("<tr id='"+result.idexec+"'><td>"+ result.idexec+"</td><td>"+ result.idcampaign +"</td><td onclick='showDetail("+result.idexec+")'>"+result.name+"</td><td>"+result.status+"</td><td>"+result.fstatus+"</td><td>"+result.reviewer+"</td><td>"+result.trace+"</td><td>"+result.start+"</td><td>"+result.end+"</td><td><button type='button' value='delete' onclick='deleteExec("+result.idexec+")'>delete </button></td></tr>");
+        var row = $("<tr id='"+result.idexec+"'><td>"+ result.idexec+"</td><td>"+ result.idcampaign +"</td><td onclick='showDetail("+result.idexec+")'>"+result.name+"</td><td>"+result.status+"</td><td>"+result.fstatus+"</td><td>"+result.reviewer+"</td><td>"+result.trace+"</td><td>"+result.start+"</td><td>"+result.end+"</td></tr>");
         searchResults.append(row);
     });
 }

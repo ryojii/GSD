@@ -45,7 +45,7 @@ var routes = Routes{
 	Route{
 		"ExecsSearch",
 		"GET",
-		"/search/{searchMethod}/{search}",
+		"/search/",
 		ExecsSearch,
 	},
 	Route{

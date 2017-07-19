@@ -9,13 +9,22 @@ html
     div class="wrapper"
       div id="executions-list" style="display:block"
         form id="search-form" onsubmit="return false"
-          input type="text" id="search"
-          select id="searchMethod"
-            option value="status" by status
-            option value="testName" by matching exact test name
-            option value="containTestName" by partial matching test name
-            option value="campaignName" by matching exact campaign name
-            option value="containCampaignName" by partial matching campaign name
+          input type="text" name="campaign" placeholder="campaign" id="search-campaign"
+          select id="status" name="status"
+            option value=
+            option value="BUG" BUG
+            option value="UPDATED" UPDATED
+            option value="NUPDATE" NEED UPDATE
+            option value="PASSED" PASSED
+            option value="FAILED" FAILED
+            option value="FP" FALSE POSITIVE
+            option value="BLOCKED" BLOCKED
+          select id="reviewer" name="reviewer"
+            option value=
+            option value="tetienne" tetienne
+            option value="shache" shache
+            option value="klagdani" klagdani
+            option value="jaiguillon" jaiguillon
           input type="submit" value="search" onClick="submitSearch()"
           input type="button" value="Get All" onClick="getAll()"
 
@@ -37,12 +46,13 @@ html
         button type="button" value="backToList" onclick="showList()" back to list
         h3.info id="campaign" name="campaign"
         p.info id="name" name="name" value="" 
-        pre.info id="trace" name="trace" 
+        textarea.info id="trace" name="trace" 
         p.info id="start" name="start" 
         p.info id="end" name="end" 
         p
           label reviewer
           select id="reviewer" name="reviewer"
+            option value=
             option value="tetienne" tetienne
             option value="shache" shache
             option value="klagdani" klagdani
@@ -51,7 +61,9 @@ html
         p
           label forcedStatus
           select id="forced-status" name="forced-status"
+            option value=
             option value="BUG" BUG
+            option value="UPDATED" UPDATED
             option value="NUPDATE" NEED UPDATE
             option value="PASSED" PASSED
             option value="FAILED" FAILED
