@@ -1,0 +1,11 @@
+#execution-detail{
+    width: 500px;
+}
+.info {
+    background-color: #F8B;
+    padding-left: 5px;
+}
+
+label {
+    padding-right: 5px;
+}

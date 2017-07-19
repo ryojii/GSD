@@ -9,7 +9,7 @@ type Exec struct {
 	Status       string    `json:"status"`
 	Trace        string    `json:"trace"`
 	ForcedStatus string    `json:"fstatus"`
-    Reviewer     string    `json:"reviewer"`
+	Reviewer     string    `json:"reviewer"`
 	StartDate    time.Time `json:"start"`
 	EndDate      time.Time `json:"end"`
 }

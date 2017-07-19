@@ -14,8 +14,8 @@ html
             option value="status" by status
             option value="testName" by matching exact test name
             option value="containTestName" by partial matching test name
-            option value="campaingName" by matching exact campaign name
-            option value="containCampaingName" by partial matching campaign name
+            option value="campaignName" by matching exact campaign name
+            option value="containCampaignName" by partial matching campaign name
           input type="submit" value="search" onClick="submitSearch()"
           input type="button" value="Get All" onClick="getAll()"
 
@@ -51,6 +51,8 @@ html
         p
           label forcedStatus
           select id="forced-status" name="forced-status"
+            option value="BUG" BUG
+            option value="NUPDATE" NEED UPDATE
             option value="PASSED" PASSED
             option value="FAILED" FAILED
             option value="FP" FALSE POSITIVE

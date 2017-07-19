@@ -1,0 +1,10 @@
+{
+"idcampaign" : "4.4.5",
+"reqid" : 0,
+"name" : "authorize#login()",
+"status" : "FAILED",
+"trace" : "this is a java stack trace, long, boring and unusable",
+"lens" : "security",
+"description" : "description for test case",
+"category" : "functional"
+}  
